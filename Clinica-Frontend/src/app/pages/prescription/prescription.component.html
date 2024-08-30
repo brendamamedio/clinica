@@ -1,0 +1,76 @@
+<!-- Botão para abrir o modal de nova prescrição -->
+<button pButton type="button" label="Nova Prescrição" icon="pi pi-plus" (click)="onNewPrescription()"></button>
+
+<!-- Lista de Prescrições -->
+<p-table [value]="prescriptions">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Número</th>
+      <th>Paciente</th>
+      <th>Doença</th>
+      <th>Nome do Remédio</th>
+      <th>Status</th>
+      <th>Ações</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-prescription>
+    <tr>
+      <td>{{ prescription.numero }}</td>
+      <td>{{ prescription.paciente?.nome }}</td>
+      <td>{{ prescription.doenca?.nome }}</td>
+      <td>{{ prescription.nomeRemedio }}</td>
+      <td>{{ prescription.status }}</td>
+      <td>
+        <button pButton icon="pi pi-check" (click)="concludePrescription(prescription.numero)" label="Concluir"></button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- Modal para Cadastrar/Editar Prescrições -->
+<p-dialog header="Prescrição" [(visible)]="displayModal" [style]="{width: '50vw'}">
+  <form [formGroup]="prescriptionForm" (ngSubmit)="savePrescription()">
+    <div class="p-fluid">
+      <div class="p-field">
+        <label for="numero">Número</label>
+        <input id="numero" formControlName="numero" pInputText type="text" />
+      </div>
+      <div class="p-field">
+        <label for="paciente">Paciente</label>
+        <p-dropdown id="paciente" formControlName="paciente" [options]="patients" optionLabel="nome" placeholder="Selecione um paciente"></p-dropdown>
+      </div>
+      <div class="p-field">
+        <label for="doenca">Doença</label>
+        <p-dropdown id="doenca" formControlName="doenca" [options]="diseases" optionLabel="nome" placeholder="Selecione uma doença"></p-dropdown>
+      </div>
+      <div class="p-field">
+        <label for="nomeRemedio">Nome do Remédio</label>
+        <input id="nomeRemedio" formControlName="nomeRemedio" pInputText type="text" />
+      </div>
+      <div class="p-field">
+        <label for="dataConsulta">Data da Consulta</label>
+        <p-calendar id="dataConsulta" formControlName="dataConsulta" [showIcon]="true"></p-calendar>
+      </div>
+      <div class="p-field">
+        <label for="tratamento">Tratamento</label>
+        <input
+          id="tratamento"
+          type="text"
+          pInputText
+          [disabled]="true"
+          [value]="prescriptionForm.get('tratamento')?.value" />
+      </div>
+      <div class="p-field">
+        <label for="dataRevisao">Data da Revisão</label>
+        <p-calendar id="dataRevisao" formControlName="dataRevisao" [showIcon]="true" [disabled]="true"></p-calendar>
+      </div>
+      <div class="p-field">
+        <label for="status">Status</label>
+        <p-dropdown id="status" formControlName="status" [options]="statusOptions"></p-dropdown>
+      </div>
+      <button pButton type="submit" label="Salvar" [disabled]="prescriptionForm.invalid"></button>
+    </div>
+  </form>
+</p-dialog>
+
+

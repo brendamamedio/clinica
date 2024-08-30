@@ -1,0 +1,19 @@
+::ng-deep{
+  #sidebar {
+    .p-menu {
+      padding-top: 64px;
+      height: 100vh;
+      background-color: var(--color-green);
+      .p-menu-list{
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        .p-menuitem-link {
+          display: flex;
+          gap: 12px;
+        }
+      }
+    }
+  }
+
+}

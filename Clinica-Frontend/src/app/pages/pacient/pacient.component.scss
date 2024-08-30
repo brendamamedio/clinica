@@ -1,0 +1,24 @@
+#pacient{
+
+  .card {
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 20px;
+  }
+}
+
+::ng-deep{
+  #pacient{
+    .card{
+      .p-datatable {
+        .p-datatable-thead {
+          tr {
+            th {
+              background-color: transparent;
+            }
+          }
+        }
+      }
+    }
+  }
+}

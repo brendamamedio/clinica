@@ -1,0 +1,50 @@
+<p-card>
+  <p-toast></p-toast>
+  <button pButton type="button" label="Cadastrar Nova Doença" icon="pi pi-plus" (click)="onNewDisease()"></button>
+
+  <p-table [value]="diseases">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>CID</th>
+        <th>Nome</th>
+        <th>Descrição</th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-disease>
+      <tr>
+        <td>{{ disease.cid }}</td>
+        <td>{{ disease.nome }}</td>
+        <td>{{ disease.descricao }}</td>
+        <td>
+          <button pButton type="button" icon="pi pi-pencil" (click)="onSelectDisease(disease)"></button>
+          <button pButton type="button" icon="pi pi-trash" (click)="confirmDelete(disease.cid)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <p-dialog header="Cadastrar/Editar Doença" [(visible)]="displayModal" [modal]="true" [closable]="false">
+    <form (ngSubmit)="onSaveDisease()">
+      <div class="p-fluid">
+        <div class="p-field">
+          <label for="cid">CID</label>
+          <input id="cid" pInputText [(ngModel)]="selectedDisease.cid" name="cid" required [readonly]="!isNew" />
+
+        </div>
+        <div class="p-field">
+          <label for="nome">Nome</label>
+          <input id="nome" pInputText [(ngModel)]="selectedDisease.nome" name="nome" required />
+        </div>
+        <div class="p-field">
+          <label for="descricao">Descrição</label>
+          <input id="descricao" pInputText [(ngModel)]="selectedDisease.descricao" name="descricao" required />
+        </div>
+        <button pButton type="submit" label="Salvar"></button>
+        <button pButton type="button" label="Cancelar" (click)="displayModal=false"></button>
+      </div>
+    </form>
+  </p-dialog>
+
+  <p-confirmDialog header="Confirmação" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+</p-card>

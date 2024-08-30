@@ -1,0 +1,97 @@
+<p-card>
+  <p-toast></p-toast> <!-- Para exibir as mensagens de sucesso/erro -->
+
+  <!-- Formulário de Busca -->
+  <form [formGroup]="searchForm" (ngSubmit)="searchPacients()">
+    <div class="p-field">
+      <p-dropdown [options]="searchOptions" formControlName="searchType" placeholder="Selecione o tipo de pesquisa"></p-dropdown>
+    </div>
+    <div class="p-field">
+      <input type="text" pInputText formControlName="searchValue" placeholder="Digite o valor de pesquisa" />
+    </div>
+    <button type="submit" pButton label="Buscar"></button>
+  </form>
+
+  <!-- Botão para Cadastrar Novo Paciente -->
+  <button type="button" pButton label="Cadastrar Paciente" icon="pi pi-plus" (click)="handleAddPacient()"></button>
+
+  <!-- Tabela de Pacientes -->
+  <p-table [value]="pacients">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>CPF</th>
+        <th>Nome</th>
+        <th>Idade</th>
+        <th>Endereço</th>
+        <th>Telefone</th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-pacient>
+      <tr>
+        <td>{{ pacient.cpf }}</td>
+        <td>{{ pacient.nome }}</td>
+        <td>{{ pacient.idade }}</td>
+        <td>{{ pacient.endereco }}</td>
+        <td>{{ pacient.telefone }}</td>
+        <td>
+          <button type="button" pButton icon="pi pi-pencil" (click)="onSelectPacient(pacient)"></button>
+          <button type="button" pButton icon="pi pi-trash" (click)="deletePacient(pacient.cpf)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- Tabela de Pacientes em Tratamento -->
+  <h3>Pacientes em Tratamento</h3>
+  <p-table [value]="pacientsInTreatment">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>CPF</th>
+        <th>Nome</th>
+        <th>Idade</th>
+        <th>Endereço</th>
+        <th>Telefone</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-pacient>
+      <tr>
+        <td>{{ pacient.cpf }}</td>
+        <td>{{ pacient.nome }}</td>
+        <td>{{ pacient.idade }}</td>
+        <td>{{ pacient.endereco }}</td>
+        <td>{{ pacient.telefone }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- Modal para Cadastro/Edição de Paciente -->
+  <p-dialog header="Cadastrar Paciente" [(visible)]="displayModal" [modal]="true" [closable]="false">
+    <form [formGroup]="pacientForm" (ngSubmit)="savePacient()">
+      <div class="p-field">
+        <label for="cpf">CPF</label>
+        <input id="cpf" type="text" pInputText formControlName="cpf" />
+      </div>
+      <div class="p-field">
+        <label for="nome">Nome</label>
+        <input id="nome" type="text" pInputText formControlName="nome" />
+      </div>
+      <div class="p-field">
+        <label for="idade">Idade</label>
+        <input id="idade" type="number" pInputText formControlName="idade" />
+      </div>
+      <div class="p-field">
+        <label for="endereco">Endereço</label>
+        <input id="endereco" type="text" pInputText formControlName="endereco" />
+      </div>
+      <div class="p-field">
+        <label for="telefone">Telefone</label>
+        <input id="telefone" type="text" pInputText formControlName="telefone" />
+      </div>
+      <div class="p-field">
+        <button type="submit" pButton label="Salvar"></button>
+        <button type="button" pButton label="Cancelar" class="p-button-secondary" (click)="displayModal = false"></button>
+      </div>
+    </form>
+  </p-dialog>
+</p-card>
