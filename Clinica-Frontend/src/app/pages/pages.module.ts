@@ -23,7 +23,7 @@ import { DialogModule } from 'primeng/dialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { AccordionModule } from 'primeng/accordion';
 import { CalendarModule } from 'primeng/calendar';
-
+import { ConfirmationService } from 'primeng/api';
 
 
 @NgModule({
@@ -52,6 +52,6 @@ import { CalendarModule } from 'primeng/calendar';
     CardModule,
     FieldsetModule,
   ],
-  providers: [MessageService]
+  providers: [MessageService, ConfirmationService]
 })
 export class PagesModule {}

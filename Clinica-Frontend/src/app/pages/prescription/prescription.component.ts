@@ -1,161 +1,217 @@
+import { Prescription } from './../../models/prescription';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MessageService } from 'primeng/api';
-import { Prescription } from '../../models/prescription';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { PrescriptionService } from '../../services/prescription.service';
 import { Disease } from '../../models/disease';
 import { Pacient } from '../../models/pacient';
-import { PacientService } from '../../services/pacient.service';
-import { DiseaseService } from '../../services/disease.service';
 
 @Component({
   selector: 'app-prescription',
   templateUrl: './prescription.component.html',
   styleUrls: ['./prescription.component.scss'],
-  providers: [MessageService]
+  providers: [ConfirmationService, MessageService],
 })
 export class PrescriptionComponent implements OnInit {
   prescriptions: Prescription[] = [];
-  patients: Pacient[] = [];
-  diseases: Disease[] = [];
+  prescriptionsInTreatment: Prescription[] = [];
+  searchForm!: FormGroup;
   prescriptionForm!: FormGroup;
-  displayModal: boolean = false;
-  statusOptions = [
-    { label: 'Em andamento', value: 'em andamento' },
-    { label: 'Concluída', value: 'concluída' },
-    { label: 'Atrasada', value: 'atrasada' }
+  isNew: boolean = false;
+  displayModalEdit: boolean = false;
+  displayModalSave: boolean = false;
+  searchOptions = [
+    { label: 'CPF', value: 'number' },
+    { label: 'Nome', value: 'nome' },
   ];
 
+  defaultDisease: Disease = {
+    cid: '',
+    nome: '',
+    descricao: ''
+  };
+
+  defaultPacient: Pacient = {
+    cpf:'',
+    nome: '',
+    idade: 0,
+    telefone:'',
+    endereco: ''
+  };
+
+  selectedPrescription: Prescription = {
+    numero: 0,
+    paciente: this.defaultPacient,
+    doenca: this.defaultDisease,
+    nomeRemedio: '',
+    dataConsulta: new Date(),
+    tratamento: '',
+    dataRevisao: new Date(),
+    status: 'em andamento',
+    revisao: false
+
+  };
+
+  error: string | null = null;
+
   constructor(
-    private fb: FormBuilder,
     private prescriptionService: PrescriptionService,
-    private pacientService: PacientService,
-    private diseaseService: DiseaseService,
-    private messageService: MessageService
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService,
+    private _buildForm: FormBuilder
   ) {}
 
   ngOnInit() {
-    this.initForm();
     this.loadPrescriptions();
-    this.loadPatients();
-    this.loadDisease();
+    console.log(this.prescriptions)
+    this.buildPrescription();
   }
 
-  initForm() {
-    this.prescriptionForm = this.fb.group({
-      numero: ['', Validators.required],
+  buildPrescription() {
+    this.prescriptionForm = this._buildForm.group({
+      numero: [{ value: '', disabled: true }, Validators.required],
       paciente: ['', Validators.required],
       doenca: ['', Validators.required],
       nomeRemedio: ['', Validators.required],
       dataConsulta: ['', Validators.required],
-      tratamento: [{ value: '', disabled: true }, Validators.required],
-      dataRevisao: [{ value: '', disabled: true }, Validators.required],
-      status: ['em andamento', Validators.required]
+      tratamento: ['', Validators.required],
+      status: ['', Validators.required],
     });
   }
 
 
+  async loadPrescriptions() {
+    try {
+      const data = await this.prescriptionService.getPrescriptions().toPromise();
+      this.prescriptions = data || [];
+    } catch (error) {
+      this.error = 'Erro ao carregar prescrições';
+    }
+  }
 
+  onEditPrescription(prescription: Prescription) {
+    this.selectedPrescription = { ...prescription };
+    this.displayModalEdit = true;
+    this.prescriptionForm.patchValue(prescription);
+    this.prescriptionForm.controls['number'].disable();
+  }
   onNewPrescription() {
     this.prescriptionForm.reset();
-    this.prescriptionForm.patchValue({ status: 'em andamento' });
-    this.displayModal = true;
+    this.prescriptionForm.controls['cpf'].enable();
+    this.displayModalSave = true;
   }
 
-  savePrescription() {
-    if (this.prescriptionForm.valid) {
-      this.calculateTreatmentAndRevision();
-      const prescription = this.prescriptionForm.getRawValue() as Prescription; // getRawValue to include disabled fields
-      this.prescriptionService.addPrescription(prescription).subscribe(
-        () => {
-          this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Prescrição salva com sucesso' });
-          this.loadPrescriptions();
-          this.displayModal = false;
-        },
-        () => {
-          this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao salvar prescrição' });
-        }
-      );
+  // async onDeletePrescription(cpf: string) {
+  //   try {
+  //     await this.prescriptionService.deletePrescription(cpf).toPromise();
+  //     this.loadPrescriptions(); // Recarregar a lista após exclusão
+  //     this.messageService.add({
+  //       severity: 'success',
+  //       summary: 'Deletado',
+  //       detail: 'Cadastro deletado com sucesso',
+  //     });
+  //   } catch (error) {
+  //     this.error = 'Erro ao excluir a prescrição';
+  //   }
+  // }
+
+
+  async onSavePrescription() {
+    if (this.prescriptionForm.invalid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Preencha todos os campos',
+      });
+      return;
+    }
+
+    try {
+      const prescription = this.prescriptionForm.getRawValue();
+      const exists = await this.checkNumber(prescription.cpf);
+      if (exists) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Aviso',
+          detail: 'Este prescrição já possui cadastro',
+        });
+        return;
+      } else {
+        await this.prescriptionService.addPrescription(prescription).toPromise();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Cadastro realizado com sucesso!',
+        });
+      }
+
+      this.loadPrescriptions();
+      this.displayModalSave = false;
+    } catch (error) {
+      this.error = 'Erro ao salvar a prescrição';
     }
   }
 
-  concludePrescription(numero: string) {
-    this.prescriptionService.concludePrescription(numero).subscribe(
-      () => {
-        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Prescrição concluída com sucesso' });
-        this.loadPrescriptions();
-      },
-      () => {
-        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao concluir prescrição' });
-      }
-    );
-  }
 
-  calculateTreatmentAndRevision() {
-    const dataConsulta = new Date(this.prescriptionForm.get('dataConsulta')?.value);
-    const idadePaciente = this.getPacienteAge(this.prescriptionForm.get('paciente')?.value);
-
-    let tratamento = '';
-    if (idadePaciente < 10) {
-      tratamento = 'Medicação 1 vez ao dia';
-    } else if (idadePaciente >= 11 && idadePaciente <= 40) {
-      tratamento = 'Medicação 2 vezes ao dia';
-    } else if (idadePaciente >= 41 && idadePaciente <= 60) {
-      tratamento = 'Medicação 3 vezes ao dia';
-    } else {
-      tratamento = 'Medicação 1 vez ao dia';
+  async onUpdatePrescription() {
+    console.log('entrou em update');
+    if (this.prescriptionForm.invalid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Preencha todos os campos',
+      });
+      return;
     }
-
-    const dataRevisao = new Date(dataConsulta);
-    dataRevisao.setDate(dataRevisao.getDate() + 30);
-
-    this.prescriptionForm.patchValue({
-      tratamento: tratamento,
-      dataRevisao: dataRevisao
-    });
+    try {
+      const prescription = this.prescriptionForm.getRawValue(); // Obtenha os valores mesmo que o CPF esteja desabilitado
+      console.log('Atualizando prescrição:', prescription); // Verifique os dados do prescrição
+      await this.prescriptionService.updatePrescription(prescription.number, prescription).toPromise();
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Sucesso',
+        detail: 'Dados do prescrição atualizados com sucesso',
+      });
+      this.loadPrescriptions(); // Recarregar a lista após atualização
+      this.displayModalEdit = false;
+    } catch (error) {
+      this.error = 'Erro ao atualizar a prescrição';
+    }
   }
 
-  getPacienteAge(pacienteId: string): number {
-    // Substitua isso pela lógica real para obter a idade do paciente
-    return 30; // Exemplo de idade
+  // confirmDelete(number: string) {
+  //   console.log('entrou em confirm')
+  //   this.confirmationService.confirm({
+  //     message: 'Você tem certeza que deseja deletar este prescrição?',
+  //     accept: () => {
+  //       this.onDeletePrescription(number);
+  //     },
+  //   });
+  // }
+
+  async checkNumber(number: number): Promise<boolean> {
+    try {
+      const prescription = await this.prescriptionService.getPrescriptionByNumber(number).toPromise();
+      return !!prescription; // Retorna true se a prescrição existir
+    } catch (error) {
+      return false; // Retorna false se a prescrição não for encontrado
+    }
   }
 
-  onDialogHide() {
-    this.prescriptionForm.reset();
+
+  async addPrescription(prescription: Prescription) {
+    try {
+      await this.prescriptionService.addPrescription(prescription);
+    } catch (error) {
+      this.error = 'Erro ao adicionar prescrição';
+    }
   }
 
-  loadPatients() {
-    this.pacientService.getPacients().subscribe(
-      (data: Pacient[]) => {
-        console.log(data)
-        this.patients = data;
-      },
-      (error: any) => {
-        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar pacientes' });
-      }
-    );
+  async updatePrescription(prescription: Prescription) {
+    try {
+      await this.prescriptionService.updatePrescription(prescription.numero, prescription);
+    } catch (error) {
+      this.error = 'Erro ao atualizar prescrição';
+    }
   }
-
-  loadDisease() {
-    this.diseaseService.getDiseases().subscribe(
-      (data: Disease[]) => {
-        this.diseases = data;
-      },
-      (error: any) => {
-        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar doenças' });
-      }
-    );
-  }
-
-  loadPrescriptions() {
-    this.prescriptionService.getPrescriptions().subscribe(
-      data => {
-        this.prescriptions = data;
-      },
-      error => {
-        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Erro ao carregar prescrições' });
-      }
-    );
-  }
-
 }

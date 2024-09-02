@@ -7,6 +7,18 @@
   }
 }
 
+p-card{
+  .p-card-body{
+
+    display: flex;
+  }
+  flex-direction: column;
+  gap: 24px;
+  .busca{
+    display: flex;
+  }
+}
+
 ::ng-deep{
   #pacient{
     .card{

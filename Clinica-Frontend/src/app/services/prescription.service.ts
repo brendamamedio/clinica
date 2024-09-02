@@ -1,8 +1,8 @@
+import { Prescription } from './../models/prescription';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Prescription } from '../models/prescription';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +17,7 @@ export class PrescriptionService {
     return this.http.get<Prescription[]>(this.apiUrl)
   }
 
-  getPrescriptionByNumero(numero: number): Observable<Prescription> {
+  getPrescriptionByNumber(numero: number): Observable<Prescription> {
     return this.http.get<Prescription>(`${this.apiUrl}/${numero}`).pipe(
       map((data: Prescription) => {
         if (data) {
@@ -28,15 +28,8 @@ export class PrescriptionService {
     );
   }
 
-  addPrescription(prescricao: Prescription): Observable<Prescription> {
-    return this.http.post<Prescription>(this.apiUrl, prescricao).pipe(
-      map((data: Prescription) => {
-        if (data) {
-          return data;
-        }
-        throw new Error('Erro ao salvar prescrição');
-      })
-    );
+  addPrescription(prescription: Prescription): Observable<Prescription> {
+    return this.http.post<Prescription>(`${this.apiUrl}`, prescription);
   }
 
   updatePrescription(numero: number, prescription: Prescription): Observable<Prescription> {

@@ -31,6 +31,7 @@ public class Prescricao {
 
     @ManyToOne
     @JoinColumn(name = "doenca_cid")
+    @JsonBackReference("doencaPrescricoes")
     private Doenca doenca;
 
     private String nomeRemedio;

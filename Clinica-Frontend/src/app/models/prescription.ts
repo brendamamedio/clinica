@@ -2,7 +2,7 @@ import { Disease } from "./disease";
 import { Pacient } from "./pacient";
 
 export interface Prescription {
-  numero: string;
+  numero: number;
   paciente: Pacient;
   doenca: Disease;
   nomeRemedio: string;

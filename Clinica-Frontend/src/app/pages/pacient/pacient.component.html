@@ -1,8 +1,9 @@
 <p-card>
-  <p-toast></p-toast> <!-- Para exibir as mensagens de sucesso/erro -->
+  <p-toast></p-toast>
+  <p-confirmDialog acceptLabel="Sim" rejectLabel="Não"></p-confirmDialog>  <!-- Para exibir as mensagens de sucesso/erro -->
 
-  <!-- Formulário de Busca -->
-  <form [formGroup]="searchForm" (ngSubmit)="searchPacients()">
+  <!-- Formulário de Busca
+  <form [formGroup]="searchForm" class="busca" (ngSubmit)="searchPacients()">
     <div class="p-field">
       <p-dropdown [options]="searchOptions" formControlName="searchType" placeholder="Selecione o tipo de pesquisa"></p-dropdown>
     </div>
@@ -10,10 +11,16 @@
       <input type="text" pInputText formControlName="searchValue" placeholder="Digite o valor de pesquisa" />
     </div>
     <button type="submit" pButton label="Buscar"></button>
-  </form>
+  </form> -->
 
   <!-- Botão para Cadastrar Novo Paciente -->
-  <button type="button" pButton label="Cadastrar Paciente" icon="pi pi-plus" (click)="handleAddPacient()"></button>
+  <button
+    type="button"
+    pButton
+    label="Cadastrar Paciente"
+    icon="pi pi-plus"
+    (click)="onNewPacient()"
+  ></button>
 
   <!-- Tabela de Pacientes -->
   <p-table [value]="pacients">
@@ -35,8 +42,18 @@
         <td>{{ pacient.endereco }}</td>
         <td>{{ pacient.telefone }}</td>
         <td>
-          <button type="button" pButton icon="pi pi-pencil" (click)="onSelectPacient(pacient)"></button>
-          <button type="button" pButton icon="pi pi-trash" (click)="deletePacient(pacient.cpf)"></button>
+          <button
+            type="button"
+            pButton
+            icon="pi pi-pencil"
+            (click)="onEditPacient(pacient)"
+          ></button>
+          <button
+            type="button"
+            pButton
+            icon="pi pi-trash"
+            (click)="confirmDelete(pacient.cpf)"
+          ></button>
         </td>
       </tr>
     </ng-template>
@@ -65,9 +82,14 @@
     </ng-template>
   </p-table>
 
-  <!-- Modal para Cadastro/Edição de Paciente -->
-  <p-dialog header="Cadastrar Paciente" [(visible)]="displayModal" [modal]="true" [closable]="false">
-    <form [formGroup]="pacientForm" (ngSubmit)="savePacient()">
+  <!-- Modal para Cadastro de Paciente -->
+  <p-dialog
+    header="Cadastrar Paciente"
+    [(visible)]="displayModalSave"
+    [modal]="true"
+    [closable]="true"
+  >
+    <form [formGroup]="pacientForm" (ngSubmit)="onSavePacient()">
       <div class="p-field">
         <label for="cpf">CPF</label>
         <input id="cpf" type="text" pInputText formControlName="cpf" />
@@ -82,15 +104,81 @@
       </div>
       <div class="p-field">
         <label for="endereco">Endereço</label>
-        <input id="endereco" type="text" pInputText formControlName="endereco" />
+        <input
+          id="endereco"
+          type="text"
+          pInputText
+          formControlName="endereco"
+        />
       </div>
       <div class="p-field">
         <label for="telefone">Telefone</label>
-        <input id="telefone" type="text" pInputText formControlName="telefone" />
+        <input
+          id="telefone"
+          type="text"
+          pInputText
+          formControlName="telefone"
+        />
       </div>
       <div class="p-field">
         <button type="submit" pButton label="Salvar"></button>
-        <button type="button" pButton label="Cancelar" class="p-button-secondary" (click)="displayModal = false"></button>
+        <button
+          type="button"
+          pButton
+          label="Cancelar"
+          class="p-button-secondary"
+          (click)="displayModalSave = false"
+        ></button>
+      </div>
+    </form>
+  </p-dialog>
+  <!-- Modal para Edição de Paciente -->
+  <p-dialog
+    header="Editar Paciente"
+    [(visible)]="displayModalEdit"
+    [modal]="true"
+    [closable]="true"
+  >
+    <form [formGroup]="pacientForm" (ngSubmit)="onUpdatePacient()">
+      <div class="p-field">
+        <label for="cpf">CPF</label>
+        <input pInputText id="cpf" type="text" formControlName="cpf" />
+      </div>
+      <div class="p-field">
+        <label for="nome">Nome</label>
+        <input id="nome" type="text" pInputText formControlName="nome" />
+      </div>
+      <div class="p-field">
+        <label for="idade">Idade</label>
+        <input id="idade" type="number" pInputText formControlName="idade" />
+      </div>
+      <div class="p-field">
+        <label for="endereco">Endereço</label>
+        <input
+          id="endereco"
+          type="text"
+          pInputText
+          formControlName="endereco"
+        />
+      </div>
+      <div class="p-field">
+        <label for="telefone">Telefone</label>
+        <input
+          id="telefone"
+          type="text"
+          pInputText
+          formControlName="telefone"
+        />
+      </div>
+      <div class="p-field">
+        <button type="submit" pButton label="Salvar"></button>
+        <button
+          type="button"
+          pButton
+          label="Cancelar"
+          class="p-button-secondary"
+          (click)="displayModalEdit = false"
+        ></button>
       </div>
     </form>
   </p-dialog>

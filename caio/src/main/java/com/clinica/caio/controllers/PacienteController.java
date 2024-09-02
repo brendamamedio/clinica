@@ -28,7 +28,7 @@ public class PacienteController {
     /**
      * Endpoint para atualizar um paciente existente.
      */
-    @PutMapping("/atualizar{id}")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<Paciente> atualizarPaciente(@PathVariable String id, @RequestBody Paciente pacienteAtualizado) {
         Paciente pacienteAtualizadoResult = pacienteService.atualizarPaciente(id, pacienteAtualizado);
         return ResponseEntity.ok(pacienteAtualizadoResult);
@@ -37,7 +37,7 @@ public class PacienteController {
     /**
      * Endpoint para excluir um paciente pelo ID.
      */
-    @DeleteMapping("/delete{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> excluirPaciente(@PathVariable String id) {
         pacienteService.deleteByCpf(id);
         return ResponseEntity.noContent().build();

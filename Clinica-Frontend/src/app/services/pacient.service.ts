@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Pacient } from '../models/pacient';
 
@@ -28,10 +28,13 @@ export class PacientService {
   }
 
   updatePacient(cpf: string, paciente: Pacient): Observable<Pacient> {
-    return this.http.put<Pacient>(`${this.apiUrl}/atualizar/${cpf}`, paciente);
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.put<Pacient>(`${this.apiUrl}/atualizar/${cpf}`, paciente, { headers });
   }
+
 
   deletePacient(cpf: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/delete/${cpf}`);
   }
+
 }
