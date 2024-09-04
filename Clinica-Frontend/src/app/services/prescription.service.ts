@@ -11,52 +11,25 @@ export class PrescriptionService {
 
   private apiUrl = 'http://localhost:8080/prescricoes'; // URL base do endpoint
 
-  constructor(private http: HttpClient) {}
+   constructor(private http: HttpClient) {}
 
-  getPrescriptions(): Observable<Prescription[]> {
-    return this.http.get<Prescription[]>(this.apiUrl)
+   getPrescriptions(): Observable<Prescription[]> {
+    return this.http.get<Prescription[]>(this.apiUrl);
   }
 
-  getPrescriptionByNumber(numero: number): Observable<Prescription> {
-    return this.http.get<Prescription>(`${this.apiUrl}/${numero}`).pipe(
-      map((data: Prescription) => {
-        if (data) {
-          return data;
-        }
-        throw new Error('Prescrição não encontrada');
-      })
-    );
+  getPrescriptionByNumero(number: number): Observable<Prescription> {
+    return this.http.get<Prescription>(`${this.apiUrl}/${number}`);
   }
 
   addPrescription(prescription: Prescription): Observable<Prescription> {
-    return this.http.post<Prescription>(`${this.apiUrl}`, prescription);
+    return this.http.post<Prescription>(this.apiUrl, prescription);
   }
 
-  updatePrescription(numero: number, prescription: Prescription): Observable<Prescription> {
-    return this.http.put<Prescription>(`${this.apiUrl}/${numero}`, prescription).pipe(
-      map((data: Prescription) => {
-        if (data) {
-          return data;
-        }
-        throw new Error('Erro ao atualizar prescrição');
-      })
-    );
+  updatePrescription(number: number, prescription: Prescription): Observable<Prescription> {
+    return this.http.put<Prescription>(`${this.apiUrl}/${number}`, prescription);
   }
 
-  concludePrescription(numero: string): Observable<Prescription> {
-    return this.http.put<Prescription>(`${this.apiUrl}/${numero}/concluir`, {}).pipe(
-      map((data: Prescription) => {
-        if (data) {
-          return data;
-        }
-        throw new Error('Erro ao concluir prescrição');
-      })
-    );
-  }
-
-  listPrescriptionsAtrasadas(): Observable<Prescription[]> {
-    return this.http.get<Prescription[]>(`${this.apiUrl}/atrasadas`).pipe(
-      map((data: Prescription[]) => data || [])
-    );
+  deletePrescription(number: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${number}`);
   }
 }

@@ -1,14 +1,42 @@
-import { Disease } from "./disease";
-import { Pacient } from "./pacient";
-
-export interface Prescription {
+export class Prescription {
   numero: number;
-  paciente: Pacient;
-  doenca: Disease;
+  paciente: {
+    cpf: string;
+    nome: string;
+    idade: number;
+    endereco: string;
+    telefone: string;
+  };
+  doenca: {
+    cid: string;
+    nome: string;
+    descricao: string;
+  };
   nomeRemedio: string;
-  dataConsulta: Date;
+  dataConsulta: string;
+  dataRevisao: string;
+  status: string;
   tratamento: string;
-  dataRevisao: Date;
-  status: 'em andamento' | 'concluída' | 'atrasada';
-  revisao?: boolean; // Opcional, para indicar se a revisão da prescrição foi realizada
+  nomePaciente?: string;
+
+  constructor() {
+    this.numero = 0;
+    this.paciente = {
+      cpf: '',
+      nome: '',
+      idade: 0,
+      endereco: '',
+      telefone: ''
+    };
+    this.doenca = {
+      cid: '',
+      nome: '',
+      descricao: ''
+    };
+    this.nomeRemedio = '';
+    this.dataConsulta = '';
+    this.dataRevisao = '';
+    this.status = '';
+    this.tratamento = '';
+  }
 }
