@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { PacientService } from '../../services/pacient.service';
+import { Prescription } from '../../models/prescription';
+import { PrescriptionService } from '../../services/prescription.service';
 
 @Component({
   selector: 'app-pacient',
@@ -11,6 +13,7 @@ import { PacientService } from '../../services/pacient.service';
   providers: [ConfirmationService, MessageService],
 })
 export class PacientComponent implements OnInit {
+
   pacients: Pacient[] = [];
   pacientsInTreatment: Pacient[] = [];
   searchForm!: FormGroup;
@@ -30,8 +33,10 @@ export class PacientComponent implements OnInit {
     idade: 0,
   };
   error: string | null = null;
+searchTerm: string = '';
 
-  constructor(
+constructor(
+    private prescriptionService: PrescriptionService,
     private pacientService: PacientService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService,
@@ -40,6 +45,7 @@ export class PacientComponent implements OnInit {
 
   ngOnInit() {
     this.loadPacients();
+    this.loadPacientsInTreatment()
     this.buildPacient();
   }
 
@@ -78,14 +84,19 @@ export class PacientComponent implements OnInit {
   async onDeletePacient(cpf: string) {
     try {
       await this.pacientService.deletePacient(cpf).toPromise();
-      this.loadPacients(); // Recarregar a lista após exclusão
+      this.loadPacients(); 
       this.messageService.add({
         severity: 'success',
         summary: 'Deletado',
-        detail: 'Cadastro deletado com sucesso',
+        detail: 'Paciente deletado com sucesso',
       });
     } catch (error) {
-      this.error = 'Erro ao excluir o paciente';
+      
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erro',
+        detail: 'Não foi possível excluir o paciente. Ele pode ter prescrições associadas.',
+      });
     }
   }
 
@@ -138,15 +149,15 @@ export class PacientComponent implements OnInit {
       return;
     }
     try {
-      const pacient = this.pacientForm.getRawValue(); // Obtenha os valores mesmo que o CPF esteja desabilitado
-      console.log('Atualizando paciente:', pacient); // Verifique os dados do paciente
+      const pacient = this.pacientForm.getRawValue(); 
+      console.log('Atualizando paciente:', pacient); 
       await this.pacientService.updatePacient(pacient.cpf, pacient).toPromise();
       this.messageService.add({
         severity: 'success',
         summary: 'Sucesso',
         detail: 'Dados do paciente atualizados com sucesso',
       });
-      this.loadPacients(); // Recarregar a lista após atualização
+      this.loadPacients(); 
       this.displayModalEdit = false;
     } catch (error) {
       this.error = 'Erro ao atualizar o paciente';
@@ -166,9 +177,9 @@ export class PacientComponent implements OnInit {
   async checkCpf(cpf: string): Promise<boolean> {
     try {
       const pacient = await this.pacientService.getPacientByCpf(cpf).toPromise();
-      return !!pacient; // Retorna true se o paciente existir
+      return !!pacient; 
     } catch (error) {
-      return false; // Retorna false se o paciente não for encontrado
+      return false; 
     }
   }
 
@@ -188,4 +199,41 @@ export class PacientComponent implements OnInit {
       this.error = 'Erro ao atualizar paciente';
     }
   }
+
+  filteredPacients(): any[] {
+    if (!this.searchTerm) {
+      return this.pacients; 
+    }
+    return this.pacients.filter(pacients =>
+      pacients.nome.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
+
+  async loadPacientsInTreatment() {
+    try {
+      const allPrescriptions = await this.prescriptionService.getPrescriptions().toPromise();
+
+      if (!allPrescriptions || allPrescriptions.length === 0) {
+        this.pacientsInTreatment = [];
+        return; 
+      }
+
+      const prescriptionsInTreatment = allPrescriptions.filter(prescription =>
+        prescription.status !== 'CONCLUIDA' && new Date(prescription.dataRevisao) > new Date()
+      );
+
+      this.pacientsInTreatment = this.getPacientsFromPrescriptions(prescriptionsInTreatment);
+
+    } catch (error) {
+      this.error = 'Erro ao carregar pacientes em tratamento';
+    }
+  }
+
+  getPacientsFromPrescriptions(prescriptions: Prescription[]): Pacient[] {
+    const pacientsInTreatment = prescriptions.map(prescription => prescription.paciente);
+    return pacientsInTreatment.filter((value, index, self) =>
+      index === self.findIndex((t) => t.cpf === value.cpf)
+    );
+  }
 }
+

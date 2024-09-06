@@ -2,15 +2,22 @@
   <p-toast></p-toast>
   <p-confirmDialog acceptLabel="Sim" rejectLabel="Não"></p-confirmDialog>
 
-  <button
-    type="button"
-    pButton
-    label="Cadastrar Prescrição"
-    icon="pi pi-plus"
-    (click)="onNewPrescription()"
-  ></button>
+  <div class="busca">
+    <div class="p-field">
+      <label for="search">Buscar Prescrição por Paciente</label>
+      <input id="search" type="text" pInputText placeholder="Digite o nome do Paciente" [(ngModel)]="searchTerm" />
+    </div>
 
-  <p-table [value]="prescriptions">
+    <button
+      type="button"
+      pButton
+      label="Cadastrar Prescrição"
+      icon="pi pi-plus"
+      (click)="onNewPrescription()"
+    ></button>
+  </div>
+
+  <p-table *ngIf="prescriptions.length > 0" [value]="filteredPrescriptions()">
     <ng-template pTemplate="header">
       <tr>
         <th>Número</th>
@@ -18,29 +25,39 @@
         <th>Doença</th>
         <th>Nome do Remédio</th>
         <th>Data da Consulta</th>
-        <th>Status</th>
+      <th>Status</th>
+      <th>Ação</th>
       </tr>
     </ng-template>
-    <ng-template pTemplate="body">
-      <tr *ngFor="let prescription of prescriptions">
+    <ng-template pTemplate="body" let-prescription>
+      <tr>
         <td>{{ prescription.numero }}</td>
         <td>{{ prescription.nomePaciente }}</td>
         <td>{{ prescription.doenca.nome }}</td>
         <td>{{ prescription.nomeRemedio }}</td>
-        <td>{{ prescription.dataConsulta | date }}</td>
+        <td>{{ prescription.dataConsulta | date: 'dd/MM/yyyy' }}</td>
         <td>{{ prescription.status }}</td>
         <td>
-          <button
-            type="button"
-            pButton
-            icon="pi pi-pencil"
-            (click)="onEditPrescription(prescription)"
-          ></button>
-          <!-- <button type="button" pButton icon="pi pi-trash" (click)="confirmDelete(prescription.numero)"></button> -->
+          <button pButton type="button" label="Visualizar" icon="pi pi-eye" (click)="viewPrescription(prescription)"></button>
         </td>
       </tr>
     </ng-template>
   </p-table>
+
+  <p *ngIf="prescriptions.length === 0">Nenhuma prescrição encontrada</p>
+
+  <p-dialog header="Detalhes da Prescrição" [(visible)]="displayModalRelatorio" [modal]="true" [closable]="true">
+    <div *ngIf="selectedPrescription">
+      <p><strong>Número:</strong> {{ selectedPrescription.numero }}</p>
+      <p><strong>Paciente:</strong> {{ selectedPrescription.nomePaciente }}</p>
+      <p><strong>Doença:</strong> {{ selectedPrescription.doenca.nome }}</p>
+      <p><strong>Nome do Remédio:</strong> {{ selectedPrescription.nomeRemedio }}</p>
+      <p><strong>Data da Consulta:</strong> {{ selectedPrescription.dataConsulta | date: 'dd/MM/yyyy' }}</p>
+      <p><strong>Data de Revisão:</strong> {{ selectedPrescription.dataRevisao | date: 'dd/MM/yyyy' }}</p>
+      <p><strong>Tratamento:</strong> {{ selectedPrescription.tratamento }}</p>
+      <p><strong>Status:</strong> {{ selectedPrescription.status }}</p>
+    </div>
+  </p-dialog>
 
   <p-dialog
     header="Cadastro de Prescrição"
@@ -49,10 +66,6 @@
     [closable]="true"
   >
     <form [formGroup]="prescriptionForm" (ngSubmit)="onSavePrescription()">
-      <div class="p-field">
-        <label for="numero">Número da prescrição</label>
-        <input id="numero" type="text" pInputText formControlName="numero" />
-      </div>
       <p-dropdown
         [options]="pacients"
         formControlName="pacienteCpf"
@@ -110,10 +123,6 @@
     [closable]="true"
   >
     <form [formGroup]="prescriptionForm" (ngSubmit)="onUpdatePrescription()">
-      <div class="p-field">
-        <label for="numero">Número da prescrição</label>
-        <input id="numero" type="text" pInputText formControlName="numero" />
-      </div>
       <p-dropdown
         [options]="pacients"
         formControlName="pacienteCpf"

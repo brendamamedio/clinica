@@ -1,34 +1,125 @@
-#pacient{
-
-  .card {
-    border: 1px solid #e5e7eb;
-    border-radius: 20px;
-    padding: 20px;
-  }
-}
-
-p-card{
-  .p-card-body{
-
-    display: flex;
-  }
+p-card {
+  padding: 2rem;
+  display: flex;
   flex-direction: column;
-  gap: 24px;
-  .busca{
-    display: flex;
-  }
-}
+  align-items: center;
 
-::ng-deep{
-  #pacient{
-    .card{
-      .p-datatable {
-        .p-datatable-thead {
-          tr {
-            th {
-              background-color: transparent;
-            }
+  .busca {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 1.5rem;
+
+    .p-field {
+      flex: 1;
+      margin-right: 1rem;
+
+      label {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.75rem;
+      }
+    }
+
+    button {
+      height: 32px;
+      white-space: nowrap;
+    }
+
+    p-table {
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 2rem;
+
+      th,
+      td {
+        padding: 0.75rem;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f4f4f4;
+        font-weight: bold;
+      }
+
+      td {
+        border-bottom: 1px solid #ddd;
+      }
+
+      button[pButton] {
+        margin-right: 0.5rem;
+      }
+    }
+
+    h3 {
+      margin-top: 2rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    // Estilos para o modal
+    p-dialog {
+      width: 500px;
+      max-width: 90%;
+      padding: 1.5rem;
+
+      header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+
+        .p-field {
+          margin-bottom: 1.5rem;
+
+          label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            display: block;
           }
+
+          input {
+            width: 100%;
+            padding: 0.75rem;
+          }
+        }
+
+        button[pButton] {
+          margin-top: 1rem;
+        }
+      }
+
+      .p-button-secondary {
+        background-color: #f4f4f4;
+        color: #333;
+      }
+    }
+
+    p-dialog[header="Editar Paciente"] {
+      header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+      }
+
+      form {
+        .p-field {
+          margin-bottom: 1.5rem;
+        }
+
+        button[pButton] {
+          margin-top: 1rem;
         }
       }
     }

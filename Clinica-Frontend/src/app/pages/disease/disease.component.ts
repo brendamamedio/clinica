@@ -11,11 +11,14 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 })
 export class DiseaseComponent implements OnInit {
 
+
+
   diseases: Disease[] = [];
   selectedDisease: Disease = { cid: '', nome: '', descricao: '' };
   error: string | null = null;
   displayModal: boolean = false;
   isNew: boolean = false;
+searchTerm: string = '';
 
   constructor(
     private diseaseService: DiseaseService,
@@ -37,24 +40,22 @@ export class DiseaseComponent implements OnInit {
   }
 
   async onNewDisease() {
-    // Reseta o objeto para novo cadastro antes de qualquer verificação
     this.selectedDisease = { cid: '', nome: '', descricao: '' };
     this.isNew = true;
 
-    // Se o CID não foi preenchido (novo cadastro), abre o modal diretamente
     this.displayModal = true;
   }
 
   onSelectDisease(disease: Disease) {
-    this.selectedDisease = { ...disease };  // Clona o objeto para edição
-    this.displayModal = true;  // Abre o modal
+    this.selectedDisease = { ...disease }; 
+    this.displayModal = true;  
     this.isNew = false;
   }
 
   async onDeleteDisease(cid: string) {
     try {
       await this.diseaseService.deleteDisease(cid).toPromise();
-      this.loadDiseases();  // Recarregar a lista após exclusão
+      this.loadDiseases();  
       this.messageService.add({ severity: 'success', summary: 'Deletado', detail: 'Doença deletada com sucesso' });
     } catch (error) {
       this.error = 'Erro ao excluir a doença';
@@ -63,7 +64,6 @@ export class DiseaseComponent implements OnInit {
 
   async onSaveDisease() {
     try {
-      // Verifica se o CID já existe
       const exists = await this.checkCid(this.selectedDisease.cid);
       if (exists && this.isNew) {
         this.messageService.add({ severity: 'warn', summary: 'Aviso', detail: 'Uma doença com este CID já está cadastrada' });
@@ -78,8 +78,8 @@ export class DiseaseComponent implements OnInit {
         this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Cadastro Atualizado!' });
       }
 
-      this.loadDiseases();  // Recarregar a lista após salvar
-      this.displayModal = false;  // Fecha o modal
+      this.loadDiseases();  
+      this.displayModal = false;  
     } catch (error) {
       this.error = 'Erro ao salvar a doença';
     }
@@ -117,5 +117,14 @@ export class DiseaseComponent implements OnInit {
     } catch (error) {
       this.error = 'Erro ao atualizar a doença';
     }
+  }
+
+  filteredDiseases(): Disease[] {
+    if (!this.searchTerm) {
+      return this.diseases; 
+    }
+    return this.diseases.filter(disease =>
+      disease.nome.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
   }
 }

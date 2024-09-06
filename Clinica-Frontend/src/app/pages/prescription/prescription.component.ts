@@ -15,6 +15,8 @@ import { DiseaseService } from '../../services/disease.service';
   providers: [ConfirmationService, MessageService],
 })
 export class PrescriptionComponent implements OnInit {
+
+
   prescriptions: Prescription[] = [];
   selectedPrescription!: Prescription;
   error: string | null = null;
@@ -25,6 +27,8 @@ export class PrescriptionComponent implements OnInit {
   pacients: Pacient[] = [];
   diseases: Disease[] = [];
   displayModalEdit: any;
+  displayModalRelatorio: any;
+searchTerm: string='';
 
   constructor(
     private prescriptionService: PrescriptionService,
@@ -44,9 +48,8 @@ export class PrescriptionComponent implements OnInit {
 
   buildForm() {
     this.prescriptionForm = this.fb.group({
-      numero: [{ value: '', disabled: false }],
-      pacienteCpf: ['', Validators.required], // CPF do paciente como string
-      doencaCid: ['', Validators.required], // CID da doença
+      pacienteCpf: ['', Validators.required],
+      doencaCid: ['', Validators.required],
       nomeRemedio: ['', Validators.required],
       dataConsulta: ['', Validators.required],
       status: ['', Validators.required],
@@ -55,40 +58,39 @@ export class PrescriptionComponent implements OnInit {
 
   async loadPrescriptions() {
     try {
-      const data = await this.prescriptionService
-        .getPrescriptions()
-        .toPromise();
-      console.log('Prescrições carregadas:', data);
-      this.prescriptions = data || [];
+        const data = await this.prescriptionService
+            .getPrescriptions()
+            .toPromise();
+        console.log('Prescrições carregadas:', data);
+        this.prescriptions = data || [];
 
-      this.prescriptions.forEach((prescription) => {
-        console.log('Processando prescrição:', prescription);
-        if (!prescription.paciente || !prescription.paciente.cpf) {
-          console.log(
-            `CPF não definido para a prescrição: ${prescription.numero}`
-          );
-        } else {
-          const paciente = this.pacients.find(
-            (p) => p.cpf === prescription.paciente.cpf
-          );
-          if (paciente) {
-            prescription.nomePaciente = paciente.nome;
-          } else {
-            console.log(
-              `Paciente não encontrado para CPF: ${prescription.paciente.cpf}`
-            );
-          }
-        }
-      });
+        this.prescriptions.forEach((prescription) => {
+            console.log('Processando prescrição:', prescription);
+            if (!prescription.paciente || !prescription.paciente.cpf) {
+                console.log(`CPF não definido para a prescrição: ${prescription.numero}`);
+            } else {
+                const paciente = this.pacients.find(
+                    (p) => p.cpf === prescription.paciente.cpf
+                );
+                if (paciente) {
+                    prescription.nomePaciente = paciente.nome;
+                } else {
+                    console.log(`Paciente não encontrado para CPF: ${prescription.paciente.cpf}`);
+                }
+            }
+        });
+
+        // Filtragem final para remover prescrições sem paciente válido
+        this.prescriptions = this.prescriptions.filter(prescription => prescription.paciente && prescription.paciente.cpf);
     } catch (error) {
-      this.error = 'Erro ao carregar prescrições';
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erro',
-        detail: this.error,
-      });
+        this.error = 'Erro ao carregar prescrições';
+        this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: this.error,
+        });
     }
-  }
+}
 
   loadPacientes() {
     this.pacientService.getPacients().subscribe(
@@ -130,8 +132,8 @@ export class PrescriptionComponent implements OnInit {
     this.selectedPrescription = { ...prescription };
     this.prescriptionForm.patchValue({
       numero: prescription.numero,
-      pacienteCpf: prescription.paciente.cpf, // Defina o CPF do paciente
-      doencaCid: prescription.doenca.cid, // Defina o CID da doença
+      pacienteCpf: prescription.paciente.cpf, 
+      doencaCid: prescription.doenca.cid,
       nomeRemedio: prescription.nomeRemedio,
       dataConsulta: prescription.dataConsulta,
       status: prescription.status,
@@ -139,6 +141,7 @@ export class PrescriptionComponent implements OnInit {
     this.isNew = false;
     this.displayModal = true;
   }
+
 
   async onSavePrescription() {
     if (this.prescriptionForm.invalid) {
@@ -150,7 +153,6 @@ export class PrescriptionComponent implements OnInit {
       return;
     }
 
-    // Obtém o CPF do paciente selecionado e o CID da doença selecionada
     const pacienteCpf = this.prescriptionForm.get('pacienteCpf')?.value;
     const diseaseCid = this.prescriptionForm.get('doencaCid')?.value;
 
@@ -163,7 +165,6 @@ export class PrescriptionComponent implements OnInit {
       return;
     }
 
-    // Associa o CPF ao paciente correto
     const pacienteSelecionado = this.pacients.find(
       (p) => p.cpf === pacienteCpf
     );
@@ -185,7 +186,6 @@ export class PrescriptionComponent implements OnInit {
       return;
     }
 
-    // Associa o CID à doença correta
     const doencaSelecionada = this.diseases.find((d) => d.cid === diseaseCid);
     if (!doencaSelecionada) {
       this.messageService.add({
@@ -242,8 +242,8 @@ export class PrescriptionComponent implements OnInit {
     this.selectedPrescription = { ...prescription };
     this.prescriptionForm.patchValue({
       numero: prescription.numero,
-      pacienteCpf: prescription.paciente.cpf, // Defina o CPF do paciente
-      doencaCid: prescription.doenca.cid,     // Defina o CID da doença
+      pacienteCpf: prescription.paciente.cpf, 
+      doencaCid: prescription.doenca.cid,     
       nomeRemedio: prescription.nomeRemedio,
       dataConsulta: prescription.dataConsulta,
       status: prescription.status
@@ -263,18 +263,18 @@ export class PrescriptionComponent implements OnInit {
       return;
     }
     try {
-      const prescription = this.prescriptionForm.getRawValue(); // Obtenha os valores mesmo que o CPF esteja desabilitado
-      console.log('Atualizando prescrição:', prescription); // Verifique os dados do paciente
+      const prescription = this.prescriptionForm.getRawValue();
+      console.log('Atualizando prescrição:', prescription); 
       await this.prescriptionService.updatePrescription(prescription.numero, prescription).toPromise();
       this.messageService.add({
         severity: 'success',
         summary: 'Sucesso',
         detail: 'Dados da prescrição atualizados com sucesso',
       });
-      this.loadPrescriptions(); // Recarregar a lista após atualização
+      this.loadPrescriptions(); 
       this.displayModalEdit = false;
-    } catch (error: any) { // Especificando o tipo 'any' para o erro
-      console.error('Erro ao atualizar a prescrição:', error); // Log do erro detalhado
+    } catch (error: any) { 
+      console.error('Erro ao atualizar a prescrição:', error); 
       this.messageService.add({
         severity: 'error',
         summary: 'Erro',
@@ -283,14 +283,19 @@ export class PrescriptionComponent implements OnInit {
     }
   }
 
+  filteredPrescriptions(): any[] {
+    if (!this.searchTerm) {
+      return this.prescriptions; 
+    }
 
+    return this.prescriptions.filter(prescription =>
+      prescription.paciente &&
+      prescription.paciente.nome.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
 
-  // confirmDelete(number: number) {
-  //   this.confirmationService.confirm({
-  //     message: 'Você tem certeza que deseja deletar esta prescrição?',
-  //     accept: () => {
-  //       this.onDeletePrescription(number);
-  //     },
-  //   });
-  // }
+  viewPrescription(prescription: any) {
+    this.selectedPrescription = prescription;
+    this.displayModalRelatorio = true;
+  }
 }

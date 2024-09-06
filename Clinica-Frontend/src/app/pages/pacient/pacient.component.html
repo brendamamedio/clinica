@@ -2,28 +2,23 @@
   <p-toast></p-toast>
   <p-confirmDialog acceptLabel="Sim" rejectLabel="Não"></p-confirmDialog>  <!-- Para exibir as mensagens de sucesso/erro -->
 
-  <!-- Formulário de Busca
-  <form [formGroup]="searchForm" class="busca" (ngSubmit)="searchPacients()">
-    <div class="p-field">
-      <p-dropdown [options]="searchOptions" formControlName="searchType" placeholder="Selecione o tipo de pesquisa"></p-dropdown>
-    </div>
-    <div class="p-field">
-      <input type="text" pInputText formControlName="searchValue" placeholder="Digite o valor de pesquisa" />
-    </div>
-    <button type="submit" pButton label="Buscar"></button>
-  </form> -->
+  <div class="busca">
 
-  <!-- Botão para Cadastrar Novo Paciente -->
-  <button
-    type="button"
-    pButton
-    label="Cadastrar Paciente"
-    icon="pi pi-plus"
-    (click)="onNewPacient()"
-  ></button>
+    <div class="p-field">
+      <label for="search">Buscar Paciente</label>
+      <input id="search" type="text" pInputText placeholder="Digite o nome do Paciente" [(ngModel)]="searchTerm" />
+    </div>
 
-  <!-- Tabela de Pacientes -->
-  <p-table [value]="pacients">
+    <button
+      type="button"
+      pButton
+      label="Cadastrar Paciente"
+      icon="pi pi-plus"
+      (click)="onNewPacient()"
+    ></button>
+  </div>
+
+  <p-table [value]="filteredPacients()">
     <ng-template pTemplate="header">
       <tr>
         <th>CPF</th>
@@ -59,28 +54,27 @@
     </ng-template>
   </p-table>
 
-  <!-- Tabela de Pacientes em Tratamento -->
-  <h3>Pacientes em Tratamento</h3>
-  <p-table [value]="pacientsInTreatment">
-    <ng-template pTemplate="header">
-      <tr>
-        <th>CPF</th>
-        <th>Nome</th>
-        <th>Idade</th>
-        <th>Endereço</th>
-        <th>Telefone</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-pacient>
-      <tr>
-        <td>{{ pacient.cpf }}</td>
-        <td>{{ pacient.nome }}</td>
-        <td>{{ pacient.idade }}</td>
-        <td>{{ pacient.endereco }}</td>
-        <td>{{ pacient.telefone }}</td>
-      </tr>
-    </ng-template>
-  </p-table>
+<h3>Pacientes em Tratamento</h3>
+<p-table [value]="pacientsInTreatment">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>CPF</th>
+      <th>Nome</th>
+      <th>Idade</th>
+      <th>Endereço</th>
+      <th>Telefone</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-pacient>
+    <tr>
+      <td>{{ pacient.cpf }}</td>
+      <td>{{ pacient.nome }}</td>
+      <td>{{ pacient.idade }}</td>
+      <td>{{ pacient.endereco }}</td>
+      <td>{{ pacient.telefone }}</td>
+    </tr>
+  </ng-template>
+</p-table>
 
   <!-- Modal para Cadastro de Paciente -->
   <p-dialog

@@ -1,8 +1,16 @@
 <p-card>
   <p-toast></p-toast>
-  <button pButton type="button" label="Cadastrar Nova Doença" icon="pi pi-plus" (click)="onNewDisease()"></button>
 
-  <p-table [value]="diseases">
+  <div class="busca">
+    <div class="p-field">
+      <label for="search">Buscar Doença</label>
+      <input id="search" type="text" pInputText placeholder="Digite o nome da doença" [(ngModel)]="searchTerm" />
+    </div>
+
+    <button pButton type="button" label="Cadastrar Nova Doença" icon="pi pi-plus" (click)="onNewDisease()"></button>
+  </div>
+
+  <p-table [value]="filteredDiseases()">
     <ng-template pTemplate="header">
       <tr>
         <th>CID</th>
@@ -46,5 +54,9 @@
     </form>
   </p-dialog>
 
-  <p-confirmDialog header="Confirmação" icon="pi pi-exclamation-triangle"></p-confirmDialog>
-</p-card>
+  <p-confirmDialog
+  header="Confirmação"
+  icon="pi pi-exclamation-triangle"
+  acceptLabel="Sim"
+  rejectLabel="Não">
+</p-confirmDialog></p-card>
